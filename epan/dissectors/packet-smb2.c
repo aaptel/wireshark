@@ -4192,8 +4192,6 @@ static void dissect_smb2_id_full_directory_info(tvbuff_t *tvb, packet_info *pinf
 
 static int dissect_smb2_posix_info(tvbuff_t *tvb, packet_info *pinfo _U_, proto_tree *tree, int offset, smb2_info_t *si _U_)
 {
-	int sid_offset;
-
 	/* create time */
 	offset = dissect_nt_64bit_time(tvb, tree, offset, hf_smb2_create_timestamp);
 
@@ -4241,15 +4239,10 @@ static int dissect_smb2_posix_info(tvbuff_t *tvb, packet_info *pinfo _U_, proto_
 	proto_tree_add_item(tree, hf_smb2_posix_perms, tvb, offset, 4, ENC_LITTLE_ENDIAN);
 	offset += 4;
 
-	/* Owner and Grop SID */
-	sid_offset = offset;
-	dissect_nt_sid(tvb, offset, tree, "Owner SID", NULL, -1);
-	offset = sid_offset + 28;
-
-	sid_offset = offset;
+	/* Owner and Group SID */
+	offset = dissect_nt_sid(tvb, offset, tree, "Owner SID", NULL, -1);
 	offset = dissect_nt_sid(tvb, offset, tree, "Group SID", NULL, -1);
-	offset = sid_offset + 28;
-	
+
 	return offset;
 }
 
@@ -7622,7 +7615,6 @@ static void
 dissect_smb2_posix_buffer_response(tvbuff_t *tvb _U_, packet_info *pinfo _U_, proto_tree *tree _U_, smb2_info_t *si _U_)
 {
 	int offset = 0;
-	int sid_offset;
 	proto_item *item;
 
 	item = proto_tree_get_parent(tree);
@@ -7640,14 +7632,9 @@ dissect_smb2_posix_buffer_response(tvbuff_t *tvb _U_, packet_info *pinfo _U_, pr
 	proto_tree_add_item(tree, hf_smb2_posix_perms, tvb, offset, 4, ENC_LITTLE_ENDIAN);
 	offset += 4;
 
-	/* Owner and Grop SID */
-	sid_offset = offset;
+	/* Owner and Group SID */
 	offset = dissect_nt_sid(tvb, offset, tree, "Owner SID", NULL, -1);
-	offset = sid_offset + 28;
-
-	sid_offset = offset;
 	offset = dissect_nt_sid(tvb, offset, tree, "Group SID", NULL, -1);
-	offset = sid_offset + 28;
 }
 
 #define SMB2_AAPL_SERVER_QUERY	1
